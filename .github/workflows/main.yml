@@ -3,6 +3,8 @@ name: Build Images
 on:
   workflow_dispatch:
   push:
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   build-rootfs:
@@ -77,11 +79,19 @@ jobs:
       run: |
         find release -type f -name '*.zip' -exec sha256sum {} \; > SHA256SUMS
 
+    - name: Delete old release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release delete latest --yes | true
+        git push --delete origin refs/tags/latest || true
+        gh release create latest
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2.2.2
       with:
         name: Latest
-        tag_name: aarchd-rootfs-${{ github.run_number }}
+        tag_name: latest
         files: |
           release/**/*.zip
           SHA256SUMS
