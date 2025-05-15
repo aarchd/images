@@ -42,7 +42,7 @@ jobs:
 
     - name: Install Android rootfs
       run: |
-        ./scripts/install_android_rootfs.sh ${{ matrix.vndk }}
+        sudo ./scripts/install_android_rootfs.sh ${{ matrix.vndk }}
 
     - name: Clean rootfs
       run: |
@@ -54,7 +54,7 @@ jobs:
       run: |
         git clone https://github.com/anestisb/android-simg2img.git --depth 1
         sudo make -j4 -C android-simg2img install
-        ./scripts/create_image.sh ${{ matrix.vndk }}
+        sudo ./scripts/create_image.sh ${{ matrix.vndk }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
