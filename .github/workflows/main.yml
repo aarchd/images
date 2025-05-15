@@ -72,9 +72,16 @@ jobs:
       with:
         path: release
 
+    
+    - name: Generate SHA256SUMS file
+      run: |
+        find release -type f -name '*.zip' -exec sha256sum {} \; > SHA256SUMS
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2.2.2
       with:
         name: Latest
         tag_name: aarchd-rootfs-${{ github.run_number }}
-        files: release/**/*.zip
+        files: |
+          release/**/*.zip
+          SHA256SUMS
