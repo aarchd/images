@@ -6,17 +6,17 @@ VNDK=$1
 
 BASE_URL="https://ci.ubports.com/job/UBportsCommunityPortsJenkinsCI/job/ubports%252Fporting%252Fcommunity-ports%252Fjenkins-ci%252Fgeneric_arm64/job"
 
-if [[ "$HALIUM_VER" == "28" ]]; then
+if [[ "$VNDK" == "28" ]]; then
     URL="$BASE_URL/main/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
-elif [[ "$HALIUM_VER" == "29" ]]; then
+elif [[ "$VNDK" == "29" ]]; then
 	URL="$BASE_URL/halium-10.0/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
-elif [[ "$HALIUM_VER" == "30" ]]; then
+elif [[ "$VNDK" == "30" ]]; then
 	URL="$BASE_URL/halium-11.0/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
-elif [[ "$HALIUM_VER" == "32" ]]; then
+elif [[ "$VNDK" == "32" ]]; then
 	URL="$BASE_URL/halium-12.0/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
-elif [[ "$HALIUM_VER" == "33" ]]; then
+elif [[ "$VNDK" == "33" ]]; then
 	URL="$BASE_URL/halium-13.0/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
-elif [[ "$HALIUM_VER" == "34" ]]; then
+elif [[ "$VNDK" == "34" ]]; then
 	URL="$BASE_URL/halium-14.0/lastSuccessfulBuild/artifact/halium_halium_arm64.tar.xz"
 else
 	echo "Invalid VNDK API: $VNDK"
