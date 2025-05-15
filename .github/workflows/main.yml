@@ -1,0 +1,78 @@
+name: Build Images
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-rootfs:
+    name: Build for VNDK ${{ matrix.vndk }}
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        vndk: [28, 29, 30, 32, 33]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Pull rootfs
+      run: |
+        gh release download -R "aarchd/rootfs" -p "rootfs.tar.gz"
+        mkdir -p build/${{ matrix.vndk }}
+        sudo tar -xzf rootfs.tar.gz -C build/${{ matrix.vndk }}
+
+    - name: Install arch-install-scripts
+      run: |
+          git clone https://github.com/aarchd/arch-install-scripts --depth 1
+          sudo make -j4 -C arch-install-scripts install
+
+    - name: Install VNDK-specific packages
+      run: |
+        sudo mount --bind $PWD build/${{ matrix.vndk }}/mnt
+        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
+        "/mnt/scripts/install_packages.sh ${{ matrix.vndk }}"
+
+    - name: Configure rootfs
+      run: |
+        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
+        "/mnt/scripts/configure.sh"
+
+    - name: Install Android rootfs
+      run: |
+        ./scripts/install_android_rootfs.sh ${{ matrix.vndk }}
+
+    - name: Clean rootfs
+      run: |
+        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
+        "/mnt/scripts/clean.sh"
+        sudo umount build/${{ matrix.vndk }}/mnt
+
+    - name: Create image
+      run: |
+        git clone https://github.com/anestisb/android-simg2img.git --depth 1
+        sudo make -j4 -C android-simg2img install
+        ./scripts/create_image.sh ${{ matrix.vndk }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: rootfs-${{ matrix.vndk }}
+        path: aarchd-rootfs-api${{ matrix.vndk }}.zip
+
+  release:
+    name: Create Release
+    needs: build-rootfs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2.2.2
+      with:
+        name: Latest
+        tag_name: aarchd-rootfs-${{ github.run_number }}
+        files: release/**/*.zip
