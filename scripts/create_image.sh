@@ -34,23 +34,23 @@ pvcreate ${DEVICE}
 
 # Create LVM volume group
 echo "Creating VG"
-vgcreate droidian "${DEVICE}"
+vgcreate aarchd "${DEVICE}"
 
 # Create LVs, currently
-# 1) droidian-persistent (128M)
-# 2) droidian-reserved (32M)
-# 3) droidian-rootfs (rest)
+# 1) aarchd-persistent (128M)
+# 2) aarchd-reserved (32M)
+# 3) aarchd-rootfs (rest)
 echo "Creating LVs"
-lvcreate --zero n -L 128M -n droidian-persistent droidian
-lvcreate --zero n -L 32M -n droidian-reserved droidian
-lvcreate --zero n -l 100%FREE -n droidian-rootfs droidian
+lvcreate --zero n -L 128M -n aarchd-persistent aarchd
+lvcreate --zero n -L 32M -n aarchd-reserved aarchd
+lvcreate --zero n -l 100%FREE -n aarchd-rootfs aarchd
 
-vgchange -ay droidian
+vgchange -ay aarchd
 vgscan --mknodes -v
 
 sleep 5
 
-ROOTFS_VOLUME=$(realpath /dev/mapper/droidian-droidian--rootfs)
+ROOTFS_VOLUME=$(realpath /dev/mapper/aarchd-aarchd--rootfs)
 
 # Create rootfs filesystem
 echo "Creating rootfs filesystem"
@@ -76,7 +76,7 @@ echo "umount root image"
 umount ${IMG_MOUNTPOINT}
 
 # clean up
-vgchange -an droidian
+vgchange -an aarchd
 
 losetup -d ${DEVICE}
 
