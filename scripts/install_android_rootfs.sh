@@ -25,4 +25,4 @@ fi
 
 wget -q "$URL"
 tar --strip-components=5 -xvf halium_halium_arm64.tar.xz system/var/lib/lxc/android/android-rootfs.img
-install -Dm644 "android-rootfs.img" "rootfs/var/lib/lxc/android/android-rootfs.img"
+install -Dm644 "android-rootfs.img" "build/$1/var/lib/lxc/android/android-rootfs.img"
