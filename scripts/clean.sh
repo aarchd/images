@@ -16,4 +16,6 @@ rm -f /var/lib/systemd/random-seed
 find /var/log -type f -exec truncate -s 0 {} \; 2>/dev/null || true
 rm -rf /var/cache/man
 
+sed -i "s/^[[:space:]]*#\s*\(CheckSpace\)/\1/" "/etc/pacman.conf"
+
 echo "[*] Done. RootFS cleaned."
