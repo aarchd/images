@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VNDK=$1
+VNDK="${1##*-api}"
 
 BASE_URL="https://ci.ubports.com/job/UBportsCommunityPortsJenkinsCI/job/ubports%252Fporting%252Fcommunity-ports%252Fjenkins-ci%252Fgeneric_arm64/job"
 

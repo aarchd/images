@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-ROOTFS_PATH="build/${1}"
+ROOTFS_PATH="${1}"
 ROOTFS_SIZE=$(du -sm $ROOTFS_PATH | awk '{ print $1 }')
 
-ZIP_NAME="aarchd-rootfs-api${1}"
+ZIP_NAME="aarchd-rootfs-${1}"
 WORK_DIR=${ZIP_NAME}.work
 IMG_SIZE=$(( ${ROOTFS_SIZE} + 250 + 128 + 150 )) # FIXME 250MB + 128MB + 150MB contingency
 IMG_MOUNTPOINT=".image"
@@ -17,6 +17,12 @@ trap clean EXIT
 
 # Crate temporary directory
 mkdir ${ZIP_NAME}.work
+
+# copy .img from rootfs if exists
+cp ${ROOTFS_PATH}/boot/boot.img ${WORK_DIR}/boot.img || true
+cp ${ROOTFS_PATH}/boot/dtbo.img ${WORK_DIR}/boot.img || true
+cp ${ROOTFS_PATH}/boot/recovery.img ${WORK_DIR}/recovery.img || true
+cp ${ROOTFS_PATH}/boot/vbmeta.img ${WORK_DIR}/vbmeta.img || true
 
 # create target base image
 echo "Creating empty image"

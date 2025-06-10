@@ -1,0 +1,38 @@
+common_packages: &common_packages
+  - aarchd-base
+
+devices:
+  - device: generic
+    vndk: 28
+    packages: &api28_packages
+      - pulseaudio-modules-droid-jb2q
+      - adaptation-hybris-api28-phone
+      - *common_packages
+
+  - device: generic
+    vndk: 29
+    packages: &api29_packages
+      - pulseaudio-modules-droid-jb2q
+      - adaptation-hybris-api29-phone
+      - *common_packages
+
+  - device: generic
+    vndk: 30
+    packages: &api30_packages
+      - pulseaudio-modules-droid-modern
+      - adaptation-hybris-api30-phone
+      - *common_packages
+
+  - device: generic
+    vndk: 32
+    packages: &api32_packages
+      - pulseaudio-modules-droid-modern
+      - adaptation-hybris-api32-phone
+      - *common_packages
+
+  - device: generic
+    vndk: 33
+    packages: &api33_packages
+      - pulseaudio-modules-droid-modern
+      - adaptation-hybris-api33-phone
+      - *common_packages

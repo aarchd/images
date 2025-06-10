@@ -7,12 +7,34 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
+  matrix-gen:
+    name: Generate Matrix
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Install dependencies
+      run: sudo pacman -Sy yq jq git --needed --noconfirm
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Generate matrix
+      id: set-matrix
+      run: |
+        MATRIX=$(yq '.devices' devices.yaml | jq -c 'map(.packages |= flatten | {device: .device, vndk: .vndk, packages: (.packages | join(" "))})')
+        echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
   build-rootfs:
-    name: Build for VNDK ${{ matrix.vndk }}
+    name: Build for ${{ matrix.device }}-api${{ matrix.vndk }}
+    env:
+      ROOTFS: ${{ matrix.device }}-api${{ matrix.vndk }}
+    needs: matrix-gen
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
-        vndk: [28, 29, 30, 32, 33]
+        include: ${{ fromJson(needs.matrix-gen.outputs.matrix) }}
 
     steps:
     - name: Checkout
@@ -23,8 +45,8 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: |
         gh release download -R "aarchd/rootfs" -p "rootfs.tar.gz"
-        mkdir -p build/${{ matrix.vndk }}
-        sudo tar -xzf rootfs.tar.gz -C build/${{ matrix.vndk }}
+        mkdir -p ${ROOTFS}
+        sudo tar -xzf rootfs.tar.gz -C ${ROOTFS}
 
     - name: Install arch-install-scripts
       run: |
@@ -33,36 +55,38 @@ jobs:
 
     - name: Install packages
       run: |
-        sudo mount --bind $PWD build/${{ matrix.vndk }}/mnt
-        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
-        "/mnt/scripts/install_packages.sh ${{ matrix.vndk }}"
+        sudo mv ${ROOTFS}/etc/pacman.d/mirrorlist ${ROOTFS}/etc/pacman.d/mirrorlist.bak
+        echo "Server = http://ca.us.mirror.archlinuxarm.org/aarch64/\$repo" | sudo tee ${ROOTFS}/etc/pacman.d/mirrorlist
+        sudo mount --bind $PWD ${ROOTFS}/mnt
+        sudo arch-chroot ${ROOTFS} /bin/bash -c \
+        "pacman -Syyu --needed --noconfirm ${{ matrix.packages }}"
 
     - name: Configure rootfs
       run: |
-        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
+        sudo arch-chroot ${ROOTFS} /bin/bash -c \
         "/mnt/scripts/configure.sh"
 
     - name: Install Android rootfs
       run: |
-        sudo ./scripts/install_android_rootfs.sh ${{ matrix.vndk }}
+        sudo ./scripts/install_android_rootfs.sh ${ROOTFS}
 
     - name: Clean rootfs
       run: |
-        sudo arch-chroot build/${{ matrix.vndk }} /bin/bash -c \
+        sudo arch-chroot ${ROOTFS} /bin/bash -c \
         "/mnt/scripts/clean.sh"
-        sudo umount build/${{ matrix.vndk }}/mnt
+        sudo umount ${ROOTFS}/mnt
 
     - name: Create image
       run: |
         git clone https://github.com/anestisb/android-simg2img.git --depth 1
         sudo make -j4 -C android-simg2img install
-        sudo ./scripts/create_image.sh ${{ matrix.vndk }}
+        sudo ./scripts/create_image.sh ${ROOTFS}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: rootfs-${{ matrix.vndk }}
-        path: aarchd-rootfs-api${{ matrix.vndk }}.zip
+        name: rootfs-${{ matrix.device }}-api${{ matrix.vndk }}
+        path: aarchd-rootfs-${{ matrix.device }}-api${{ matrix.vndk }}.zip
 
   release:
     name: Create Release
