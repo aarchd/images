@@ -25,6 +25,7 @@ fi
 
 echo "[*] Downloading Android rootfs for VNDK API $VNDK"
 wget -q "$URL"
+echo "[*] Extracting Android rootfs"
 tar --strip-components=5 -xvf halium_halium_arm64.tar.xz system/var/lib/lxc/android/android-rootfs.img
-install -Dm644 "android-rootfs.img" "build/$1/var/lib/lxc/android/android-rootfs.img"
-echo "[✓] Android rootfs for VNDK API $VNDK installed successfully"
+install -Dm644 "android-rootfs.img" "$1/var/lib/lxc/android/android-rootfs.img"
+echo "[✓] Android rootfs installed successfully"
