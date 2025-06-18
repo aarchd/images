@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "Setting up system"
+echo "[*] Setting up system"
 
 USERNAME=${1:-aarchd}
 PASSWORD=${2:-3355}
@@ -31,3 +31,5 @@ systemctl enable sshd
 systemctl enable lxc@android
 
 chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+echo "[✓] System setup completed successfully"

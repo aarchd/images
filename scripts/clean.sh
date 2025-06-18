@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+echo "[*] Cleaning up root filesystem"
+
 pacman -Scc --noconfirm
 rm -rf /var/lib/pacman/sync
 rm -f /etc/machine-id
@@ -19,4 +21,4 @@ rm -rf /var/cache/man
 sed -i "s/^[[:space:]]*#\s*\(CheckSpace\)/\1/" "/etc/pacman.conf"
 mv /etc/pacman.d/mirrorlist.bak /etc/pacman.d/mirrorlist || true
 
-echo "[*] Done. RootFS cleaned."
+echo "[✓] Done. RootFS cleaned."
