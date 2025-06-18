@@ -5,8 +5,8 @@ set -euo pipefail
 ROOTFS_PATH="${1}"
 ROOTFS_SIZE=$(du -sm $ROOTFS_PATH | awk '{ print $1 }')
 
-ZIP_NAME="aarchd-rootfs-${1}"
-WORK_DIR=${ZIP_NAME}.work
+ARCHIVE_NAME="aarchd-rootfs-${1}"
+WORK_DIR=${ARCHIVE_NAME}.work
 IMG_SIZE=$(( ${ROOTFS_SIZE} + 250 ))
 IMG_MOUNTPOINT=".image"
 
@@ -56,8 +56,8 @@ echo "[*] Converting to sparse image"
 img2simg "${WORK_DIR}/userdata.raw" "${WORK_DIR}/userdata.img"
 rm -f "${WORK_DIR}/userdata.raw"
 
-echo "[*] Creating zip"
+echo "[*] Creating archive"
 cd "${WORK_DIR}"
-zip -r ../${ZIP_NAME}.zip .
+tar -cf ../${ARCHIVE_NAME}.tar.zst --use-compress-program="zstd -19 -T0" .
 
 echo "[✓] Done."

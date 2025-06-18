@@ -86,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rootfs-${{ matrix.device }}-api${{ matrix.vndk }}
-        path: aarchd-rootfs-${{ matrix.device }}-api${{ matrix.vndk }}.zip
+        path: aarchd-rootfs-${{ matrix.device }}-api${{ matrix.vndk }}.tar.zst
 
   release:
     name: Create Release
@@ -103,7 +103,7 @@ jobs:
     
     - name: Generate SHA256SUMS file
       run: |
-        find release -type f -name '*.zip' -exec sha256sum {} \; > SHA256SUMS
+        find release -type f -name '*.tar.zst' -exec sha256sum {} \; > SHA256SUMS
 
     - name: Delete old release
       env:
@@ -118,5 +118,5 @@ jobs:
         name: Latest
         tag_name: latest
         files: |
-          release/**/*.zip
+          release/**/*.tar.zst
           SHA256SUMS
