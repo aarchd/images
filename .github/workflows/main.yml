@@ -10,12 +10,12 @@ jobs:
   matrix-gen:
     name: Generate Matrix
     runs-on: ubuntu-latest
-    container: archlinux:base-devel
+    container: alpine:latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
     - name: Install dependencies
-      run: sudo pacman -Sy yq jq git --needed --noconfirm
+      run: apk add --no-cache yq-python jq git
 
     - name: Checkout
       uses: actions/checkout@v4
