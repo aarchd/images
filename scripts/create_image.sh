@@ -18,14 +18,14 @@ trap clean EXIT
 echo "[*] Creating work directory"
 mkdir -p ${WORK_DIR}
 
-for img in boot.img dtbo.img recovery.img vbmeta.img vendor_boot.img; do
-    if [[ -f "${ROOTFS_PATH}/boot/${img}" ]]; then
-		echo "[*] Copying ${img} from rootfs"
-		cp "${ROOTFS_PATH}/boot/${img}" "${WORK_DIR}/"
-	else
-		echo "[*] Skipping ${img}, not found in rootfs"
-	fi
-done
+echo "[*] Copying images from rootfs"
+cp "${ROOTFS_PATH}/boot/*.img*" "${WORK_DIR}/" || true
+if [ "$(ls -A ${WORK_DIR}/boot/*.img* 2>/dev/null)" ]; then
+    echo "[*] Copied images:"
+    ls -l ${WORK_DIR}/boot/*.img*
+else
+    echo "[!] No images found in rootfs, continuing without them."
+fi
 
 echo "[*] Creating empty image (${IMG_SIZE}MB)"
 dd if=/dev/zero of=${WORK_DIR}/userdata.raw bs=1M count=${IMG_SIZE}
