@@ -27,7 +27,10 @@ pacman -S xdg-user-dirs --noconfirm
 sudo -u "$USERNAME" -H bash -c "xdg-user-dirs-update"
 pacman -Rns xdg-user-dirs --noconfirm
 
-systemctl enable sshd
+if pacman -Qi openssh &>/dev/null; then
+    systemctl enable sshd
+fi
+
 systemctl enable lxc@android
 
 chown -R $USERNAME:$USERNAME /home/$USERNAME
