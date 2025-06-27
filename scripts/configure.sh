@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "[*] Setting up system"
+echo "[*] Setting up User"
 
 USERNAME=${1:-aarchd}
 PASSWORD=${2:-3355}
@@ -23,14 +23,15 @@ mkdir -p /etc/sudoers.d/
 echo "$USERNAME ALL=(ALL) ALL" > "/etc/sudoers.d/00_$USERNAME"
 chmod 0440 "/etc/sudoers.d/00_$USERNAME"
 
+echo "[*] Setting up User Directories"
 pacman -S xdg-user-dirs --noconfirm
 sudo -u "$USERNAME" -H bash -c "xdg-user-dirs-update"
 pacman -Rns xdg-user-dirs --noconfirm
 
+echo "[*] Configuring systemd services"
 if pacman -Qi openssh &>/dev/null; then
     systemctl enable sshd
 fi
-
 systemctl enable lxc@android
 
 chown -R $USERNAME:$USERNAME /home/$USERNAME
