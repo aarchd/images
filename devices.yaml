@@ -1,6 +1,13 @@
 common_packages: &common_packages
   - aarchd-base
 
+debug_packages: &debug_packages
+  - hybris-usb
+  - droidian-quirks-journald-development
+  - strace
+  - gdb
+  - libinput
+
 devices:
   - device: generic
     vndk: 28
@@ -8,6 +15,7 @@ devices:
       - pulseaudio-modules-droid-jb2q
       - adaptation-hybris-api28-phone
       - *common_packages
+      - *debug_packages
 
   - device: generic
     vndk: 29
@@ -15,6 +23,7 @@ devices:
       - pulseaudio-modules-droid-jb2q
       - adaptation-hybris-api29-phone
       - *common_packages
+      - *debug_packages
 
   - device: generic
     vndk: 30
@@ -22,6 +31,7 @@ devices:
       - pulseaudio-modules-droid-modern
       - adaptation-hybris-api30-phone
       - *common_packages
+      - *debug_packages
 
   - device: generic
     vndk: 32
@@ -29,6 +39,7 @@ devices:
       - pulseaudio-modules-droid-modern
       - adaptation-hybris-api32-phone
       - *common_packages
+      - *debug_packages
 
   - device: generic
     vndk: 33
@@ -36,3 +47,4 @@ devices:
       - pulseaudio-modules-droid-modern
       - adaptation-hybris-api33-phone
       - *common_packages
+      - *debug_packages
