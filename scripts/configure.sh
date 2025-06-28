@@ -7,7 +7,7 @@ echo "[*] Setting up User"
 USERNAME=${1:-aarchd}
 PASSWORD=${2:-3355}
 
-echo $USERNAME > /etc/hostname
+echo "$USERNAME" > /etc/hostname
 echo "127.0.0.1 $USERNAME" >> /etc/hosts
 
 sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
@@ -32,6 +32,6 @@ if pacman -Qi openssh &>/dev/null; then
 fi
 systemctl enable lxc@android
 
-chown -R $USERNAME:$USERNAME /home/$USERNAME
+chown -R "$USERNAME:$USERNAME" "/home/$USERNAME"
 
 echo "[✓] System setup completed successfully"
