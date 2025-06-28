@@ -19,9 +19,7 @@ useradd -m -s /bin/bash "$USERNAME"
 echo "$USERNAME:$PASSWORD" | chpasswd
 echo "root:$PASSWORD" | chpasswd
 
-mkdir -p /etc/sudoers.d/
-echo "$USERNAME ALL=(ALL) ALL" > "/etc/sudoers.d/00_$USERNAME"
-chmod 0440 "/etc/sudoers.d/00_$USERNAME"
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 echo "[*] Setting up User Directories"
 pacman -S xdg-user-dirs --noconfirm
