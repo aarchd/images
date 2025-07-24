@@ -7,7 +7,7 @@ ROOTFS_SIZE=$(du -sm "$ROOTFS_PATH" | awk '{ print $1 }')
 
 ARCHIVE_NAME="aarchd-rootfs-${1}"
 WORK_DIR=${ARCHIVE_NAME}.work
-IMG_SIZE=$(( "${ROOTFS_SIZE}" + 250 ))
+IMG_SIZE=$(( "${ROOTFS_SIZE}" + 250 + 128 + 150 ))
 IMG_MOUNTPOINT=".image"
 
 clean() {
@@ -30,13 +30,26 @@ fi
 echo "[*] Creating empty image (${IMG_SIZE}MB)"
 dd if=/dev/zero of="${WORK_DIR}"/userdata.raw bs=1M count=${IMG_SIZE}
 
+echo "[*] LVM setup"
+DEVICE=$(losetup --find --show "${WORK_DIR}/userdata.raw")
+echo "[*] Using loop device: ${DEVICE}"
+pvcreate "${DEVICE}"
+vgcreate aarchd "${DEVICE}"
+echo "[*] Creating logical volumes"
+lvcreate --zero n -L 128M -n aarchd-persistent aarchd
+lvcreate --zero n -L 32M -n aarchd-reserved aarchd
+lvcreate --zero n -l 100%FREE -n aarchd-rootfs aarchd
+vgchange -ay aarchd
+vgscan --mknodes -v
+sleep 5
+ROOTFS_VOLUME=$(realpath /dev/mapper/aarchd-aarchd--rootfs)
+
 echo "[*] Formatting image with ext4"
-mkfs.ext4 -F -O ^metadata_csum,^64bit,^orphan_file "${WORK_DIR}/userdata.raw"
+mkfs.ext4 -F -O ^metadata_csum,^64bit,^orphan_file "${ROOTFS_VOLUME}"
 
 echo "[*] Mounting image"
 mkdir -p $IMG_MOUNTPOINT
-DEVICE=$(losetup --find --show "${WORK_DIR}/userdata.raw")
-mount "${DEVICE}" "${IMG_MOUNTPOINT}"
+mount "${ROOTFS_VOLUME}" "${IMG_MOUNTPOINT}"
 
 echo "[*] Syncing rootfs"
 rsync -aHAX "${ROOTFS_PATH}"/* "${IMG_MOUNTPOINT}"
@@ -45,11 +58,11 @@ sync
 
 echo "[*] Creating resize stamp"
 mkdir -p ${IMG_MOUNTPOINT}/var/lib/halium
-touch ${IMG_MOUNTPOINT}/var/lib/halium/requires-resize
+touch ${IMG_MOUNTPOINT}/var/lib/halium/requires-lvm-resize
 
 echo "[*] Unmounting image"
 umount "${IMG_MOUNTPOINT}"
-rm -rf "${IMG_MOUNTPOINT}"
+vgchange -an aarchd
 losetup -d "${DEVICE}"
 
 echo "[*] Converting to sparse image"
